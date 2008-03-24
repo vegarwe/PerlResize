@@ -1,0 +1,4 @@
+Modules needed:
+
+aptitude install libimage-magick-perl libmime-perl libmime-types-perl libwww-perl 
+aptitude install libapache2-request-perl libapache2-mod-perl2-dev libapache-session-perl libapache-dbi-perl
