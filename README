@@ -28,3 +28,6 @@ TODO:
 
 * $cache directory has to be set with PerSetVar somehow...
 * Test different kinds of $err combinations to verify that it works
+* Add etag in addition to Last-Modified
+* Figure out why sendfile($file) didn't set 'Last-Modified' even thoug mtime
+  was set.
