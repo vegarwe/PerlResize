@@ -1,4 +1,30 @@
+Setup:
+======
+
+For now the $cache variable (where to store resized images) has to be set in
+directly in the module. Other than that all that is needed is to set the
+perlhandler for the images or image directories that needs resizing.
+
+sample <Location> directive:
+
+  <Location /images>
+  	SetHandler perl-script
+  	PerlHandler PerlResize
+  </Location>
+
+The mod_perl should be configured to load libraries. Sample startup.pl is
+provided with the package. mods-enabled/perl.conf could look like this:
+  PerlRequire "/etc/apache2/perl/startup.pl"
+  PerlSwitches -wT
+
 Modules needed:
+===============
 
 aptitude install libimage-magick-perl libmime-perl libmime-types-perl libwww-perl 
 aptitude install libapache2-request-perl libapache2-mod-perl2-dev libapache-session-perl libapache-dbi-perl
+
+TODO:
+=====
+
+* $cache directory has to be set with PerSetVar somehow...
+* Test different kinds of $err combinations to verify that it works
