@@ -42,7 +42,6 @@ sub handler {
 	$file = $r->filename;
 	$r->args =~ m#geometry=(\d+)x(\d+)#;
 	if ($1 > $max_size || $2 > $max_size) {
-		# TODO: Send '405 Method Not Allowed', "Size $1x$2 out of max range"
   		$r->log_error("Size ($1x$2) out of max range");
 		$r->custom_response(Apache2::Const::HTTP_METHOD_NOT_ALLOWED, "<h1>405 Method Not Allowed</h1><p>Size ($1x$2) out of max range</p>");
   		return Apache2::Const::HTTP_METHOD_NOT_ALLOWED;
