@@ -20,7 +20,7 @@ use File::Basename qw(fileparse);
 use Apache2::Const -compile => qw(:common HTTP_NOT_MODIFIED HTTP_METHOD_NOT_ALLOWED);
 
 our $max_size = 5000;
-our $cache = "/var/www/abakus.no/app/files/cache/";
+our $cache = "/var/cache/apache2/mod_perl_resize";
 
 sub handler {
 	my $r = shift; 
