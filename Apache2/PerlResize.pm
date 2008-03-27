@@ -1,4 +1,4 @@
-package PerlResize;
+package Apache2::PerlResize;
 
 #
 # Script that resize and cache images based on input.
