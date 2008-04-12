@@ -1,21 +1,35 @@
 Setup:
 ======
 
+* cd /etc/apache2
+* bzr branch http://home.samfundet.no/~vegarwe/perl_resize perl
+* Install needed modules (see below)
+* mkdir /var/cache/apache2/mod_perl_resize
+* chown www-data:www-data /var/cache/apache2/mod_perl_resize
+* Enable and configure mod-perl (see perl.conf example below)
+* Enable Apache2::PerlResize on selected hosts (see Location example below)
+
 For now the $cache variable (where to store resized images) has to be set in
 directly in the module. Other than that all that is needed is to set the
 perlhandler for the images or image directories that needs resizing.
 
-sample <Location> directive:
-
+Sample <Location> directive:
   <Location /images>
   	SetHandler perl-script
-  	PerlHandler PerlResize
+  	PerlHandler Apache2::PerlResize
   </Location>
 
 The mod_perl should be configured to load libraries. Sample startup.pl is
 provided with the package. mods-enabled/perl.conf could look like this:
   PerlRequire "/etc/apache2/perl/startup.pl"
   PerlSwitches -wT
+
+Example .htaccess to get pretty urls:
+  RewriteEngine on
+  
+  RewriteBase /gallery/
+  RewriteRule ^(.*)/(\d+x\d+)/(.*)     $1/$3?geometry=$2
+
 
 Modules needed:
 ===============
@@ -26,7 +40,6 @@ aptitude install libapache2-request-perl libapache2-mod-perl2-dev libapache-sess
 TODO:
 =====
 
-* $cache directory has to be set with PerSetVar somehow...
 * Test different kinds of $err combinations to verify that it works
 * Add etag in addition to Last-Modified
 * Figure out why sendfile($file) didn't set 'Last-Modified' even thoug mtime
