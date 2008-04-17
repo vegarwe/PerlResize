@@ -19,6 +19,8 @@ use Image::Magick;
 use File::Basename qw(fileparse);
 use Apache2::Const -compile => qw(:common HTTP_NOT_MODIFIED HTTP_METHOD_NOT_ALLOWED);
 
+use Apache2::Overload;
+
 our $max_size = 5000;
 our $cache = "/var/cache/apache2/mod_perl_resize";
 
@@ -34,8 +36,15 @@ sub handler {
 
 	# Must be image, with cusom geometry and read permissions must be granted
 	return Apache2::Const::DECLINED unless $r->content_type() =~ m#^image/.*$#;
-    	return Apache2::Const::DECLINED unless $r->args;
+	return Apache2::Const::DECLINED unless $r->args;
 	return Apache2::Const::DECLINED unless -r $r->filename;
+
+	# If we are in overload mode (aka Slashdot mode), refuse to generate
+	# new thumbnails.
+	if (Apache2::Overload::is_in_overload($r)) {
+		$r->log->warn("In overload mode, not scaling " . $r->filename);
+		return Apache2::Const::DECLINED;
+	}
 
 	my ($file, $args, $cfile, $stat, $cstat, $modified_since);
 
