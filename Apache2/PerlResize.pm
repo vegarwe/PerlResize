@@ -40,7 +40,6 @@ sub handler {
 	return Apache2::Const::DECLINED unless -r $r->filename;
 
 	# If we are in overload mode (aka Slashdot mode), refuse to generate
-	# new thumbnails.
 	if (Apache2::Overload::is_in_overload($r)) {
 		$r->log->warn("In overload mode, not scaling " . $r->filename);
 		return Apache2::Const::DECLINED;
