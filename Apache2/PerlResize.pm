@@ -12,8 +12,9 @@ package Apache2::PerlResize;
 
 use strict;
 use warnings;
-use HTTP::Date;
+use HTTP::Date; # TODO: Remove this dependencie
 use APR::Table;
+use APR::Date;
 use File::stat;
 use Image::Magick;
 use File::Basename qw(fileparse);
@@ -63,7 +64,8 @@ sub handler {
 	$stat = File::stat::stat($file);
 
 	$modified_since = $r->headers_in->get('If-Modified-Since');
-	$modified_since = HTTP::Date::str2time($modified_since);
+	$modified_since = APR::Date::parse_http($modified_since);
+	#$r->log_error($modified_since);
 	if (defined $modified_since && $modified_since >= $stat->mtime) {
 		$r->log_error("not modified");
         	return Apache2::Const::HTTP_NOT_MODIFIED;
