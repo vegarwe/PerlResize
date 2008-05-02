@@ -28,12 +28,12 @@ our $cache = "/var/cache/apache2/mod_perl_resize";
 sub handler {
     my $r = shift; 
 
-    #$r->log_error("PerlResize");
-    #$r->log_error("  content_type: ".$r->content_type());
-    #$r->log_error("  filename:     ".$r->filename);
-    #$r->log_error("  path_info:    ".$r->path_info);
-    #$r->log_error("  args:         ".$r->args);
-    #$r->log_error("  finfo         ".$r->finfo);
+    #$r->log->info("PerlResize");
+    #$r->log->info("  content_type: ".$r->content_type());
+    #$r->log->info("  filename:     ".$r->filename);
+    #$r->log->info("  path_info:    ".$r->path_info);
+    #$r->log->info("  args:         ".$r->args);
+    #$r->log->info("  finfo         ".$r->finfo);
 
     # Must be image, with cusom geometry and read permissions must be granted
     return Apache2::Const::DECLINED unless $r->content_type() =~ m#^image/.*$#;
@@ -65,14 +65,14 @@ sub handler {
 
     # If the client can use cache, by all means do so
     if ((my $rc = $r->meets_conditions) != Apache2::Const::OK) {
-        $r->log_error("not modified");
+        $r->log->info("not modified");
         return $rc;
     }
 
     $cstat = File::stat::stat($cfile);
 
     if (!defined $cstat || $cstat->mtime < $stat->mtime) {
-        $r->log_error("cache miss");
+        $r->log->info("cache miss");
 
     	# If we are in overload mode (aka Slashdot mode), refuse to generate
     	if (Apache2::Overload::is_in_overload($r)) {
@@ -96,7 +96,7 @@ sub handler {
             return Apache2::Const::SERVER_ERROR;
         }
     } else {
-        $r->log_error("cache hit");
+        $r->log->info("cache hit");
     }
 
     #$r->set_content_length($stat->size);
