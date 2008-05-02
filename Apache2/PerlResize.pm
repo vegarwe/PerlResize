@@ -44,12 +44,6 @@ sub handler {
 		$cache = $r->dir_config('CacheDir');
 	}
 
-    # If we are in overload mode (aka Slashdot mode), refuse to generate
-    if (Apache2::Overload::is_in_overload($r)) {
-        $r->log->warn("In overload mode, not scaling " . $r->filename);
-        return Apache2::Const::DECLINED;
-    }
-
     my ($file, $args, $cfile, $stat, $cstat);
 
     $file = $r->filename;
@@ -79,6 +73,12 @@ sub handler {
 
     if (!defined $cstat || $cstat->mtime < $stat->mtime) {
         $r->log_error("cache miss");
+
+    	# If we are in overload mode (aka Slashdot mode), refuse to generate
+    	if (Apache2::Overload::is_in_overload($r)) {
+    	    $r->log->warn("In overload mode, not scaling " . $r->filename);
+    	    return Apache2::Const::DECLINED;
+    	}
 
         my $q = Image::Magick->new;
         my $err = $q->Read($file);
