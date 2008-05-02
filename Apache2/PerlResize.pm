@@ -8,13 +8,13 @@ package Apache2::PerlResize;
 # Author: Vegar Westerlund <vegarwe@gmail.com>
 #
 # Thanks to:
-# adamcik@samfundet.no
-# sgunderson@bigfoot.com
+# * adamcik@samfundet.no
+# * sgunderson@bigfoot.com
 #
 
 use strict;
 use warnings;
-use APR::Table;
+use APR::Finfo;
 use File::stat;
 use Image::Magick;
 use File::Basename qw(fileparse);
@@ -28,13 +28,6 @@ our $cache = "/var/cache/apache2/mod_perl_resize";
 sub handler {
     my $r = shift; 
 
-    #$r->log->info("PerlResize");
-    #$r->log->info("  content_type: ".$r->content_type());
-    #$r->log->info("  filename:     ".$r->filename);
-    #$r->log->info("  path_info:    ".$r->path_info);
-    #$r->log->info("  args:         ".$r->args);
-    #$r->log->info("  finfo         ".$r->finfo);
-
     # Must be image, with cusom geometry and read permissions must be granted
     return Apache2::Const::DECLINED unless $r->content_type() =~ m#^image/.*$#;
     return Apache2::Const::DECLINED unless $r->args;
@@ -44,13 +37,14 @@ sub handler {
         $cache = $r->dir_config('CacheDir');
     }
 
-    my ($file, $args, $cfile, $stat, $cstat);
+    my ($file, $args, $cfile, $cstat);
 
     $file = $r->filename;
     $r->args =~ m#geometry=(\d+)x(\d+)#;
     if ($1 > $max_size || $2 > $max_size) {
         $r->log_error("Size ($1x$2) out of max range");
-        $r->custom_response(Apache2::Const::HTTP_METHOD_NOT_ALLOWED, "<h1>405 Method Not Allowed</h1><p>Size ($1x$2) out of max range</p>");
+        $r->custom_response(Apache2::Const::HTTP_METHOD_NOT_ALLOWED,
+			"<h1>405 Method Not Allowed</h1><p>Size ($1x$2) out of max range</p>");
         return Apache2::Const::HTTP_METHOD_NOT_ALLOWED;
     }
     $args = "$1x$2";
@@ -59,9 +53,7 @@ sub handler {
     $cfile =~ s#/#_#g;
     $cfile = "$cache/$cfile$name-$args$suffix";
 
-    $stat = File::stat::stat($file);
-
-    $r->set_last_modified($stat->mtime);
+    $r->set_last_modified($r->finfo->mtime);
 
     # If the client can use cache, by all means do so
     if ((my $rc = $r->meets_conditions) != Apache2::Const::OK) {
@@ -71,7 +63,7 @@ sub handler {
 
     $cstat = File::stat::stat($cfile);
 
-    if (!defined $cstat || $cstat->mtime < $stat->mtime) {
+    if (!defined $cstat || $cstat->mtime < $r->finfo->mtime) {
         $r->log->info("cache miss");
 
         # If we are in overload mode (aka Slashdot mode), refuse to generate
@@ -86,9 +78,9 @@ sub handler {
             $err ||= $q->Set(colorspace=>'RGB');
         }
 
-        $err ||= $q->Resize(geometry => $args);
+        $err ||= $q->Resize(geometry => $args, filter=>'Lanczos');
         $err ||= $q->Strip(); # Strip EXIF tags
-        $err ||= $q->Write(filename => $cfile);
+        $err ||= $q->Write(filename => $cfile, quality => 95);
         $cstat = File::stat::stat($cfile);
         undef $q;
 
