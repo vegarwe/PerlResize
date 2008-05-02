@@ -40,6 +40,10 @@ sub handler {
     return Apache2::Const::DECLINED unless $r->args;
     return Apache2::Const::DECLINED unless -r $r->filename;
 
+	if (defined($r->dir_config('CacheDir'))) {
+		$cache = $r->dir_config('CacheDir');
+	}
+
     # If we are in overload mode (aka Slashdot mode), refuse to generate
     if (Apache2::Overload::is_in_overload($r)) {
         $r->log->warn("In overload mode, not scaling " . $r->filename);
