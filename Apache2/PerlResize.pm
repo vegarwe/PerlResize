@@ -7,7 +7,9 @@ package Apache2::PerlResize;
 #
 # Author: Vegar Westerlund <vegarwe@gmail.com>
 #
-# Thanks to adamcik@samfundet.no
+# Thanks to:
+# adamcik@samfundet.no
+# sgunderson@bigfoot.com
 #
 
 use strict;
