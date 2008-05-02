@@ -40,16 +40,16 @@ sub handler {
     return Apache2::Const::DECLINED unless $r->args;
     return Apache2::Const::DECLINED unless -r $r->filename;
 
-	if (defined($r->dir_config('CacheDir'))) {
-		$cache = $r->dir_config('CacheDir');
-	}
+    if (defined($r->dir_config('CacheDir'))) {
+        $cache = $r->dir_config('CacheDir');
+    }
 
     my ($file, $args, $cfile, $stat, $cstat);
 
     $file = $r->filename;
     $r->args =~ m#geometry=(\d+)x(\d+)#;
     if ($1 > $max_size || $2 > $max_size) {
-    	$r->log_error("Size ($1x$2) out of max range");
+        $r->log_error("Size ($1x$2) out of max range");
         $r->custom_response(Apache2::Const::HTTP_METHOD_NOT_ALLOWED, "<h1>405 Method Not Allowed</h1><p>Size ($1x$2) out of max range</p>");
         return Apache2::Const::HTTP_METHOD_NOT_ALLOWED;
     }
@@ -74,11 +74,11 @@ sub handler {
     if (!defined $cstat || $cstat->mtime < $stat->mtime) {
         $r->log->info("cache miss");
 
-    	# If we are in overload mode (aka Slashdot mode), refuse to generate
-    	if (Apache2::Overload::is_in_overload($r)) {
-    	    $r->log->warn("In overload mode, not scaling " . $r->filename);
-    	    return Apache2::Const::DECLINED;
-    	}
+        # If we are in overload mode (aka Slashdot mode), refuse to generate
+        if (Apache2::Overload::is_in_overload($r)) {
+            $r->log->warn("In overload mode, not scaling " . $r->filename);
+            return Apache2::Const::DECLINED;
+        }
 
         my $q = Image::Magick->new;
         my $err = $q->Read($file);
@@ -89,6 +89,7 @@ sub handler {
         $err ||= $q->Resize(geometry => $args);
         $err ||= $q->Strip(); # Strip EXIF tags
         $err ||= $q->Write(filename => $cfile);
+        $cstat = File::stat::stat($cfile);
         undef $q;
 
         if ($err) {
@@ -99,7 +100,7 @@ sub handler {
         $r->log->info("cache hit");
     }
 
-    #$r->set_content_length($stat->size);
+    $r->set_content_length($cstat->size);
     $r->sendfile($cfile);
     return Apache2::Const::OK;
 }
