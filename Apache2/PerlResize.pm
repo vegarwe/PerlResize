@@ -54,6 +54,7 @@ sub handler {
     $cfile = "$cache/$cfile$name-$args$suffix";
 
     $r->set_last_modified($r->finfo->mtime);
+    $r->set_etag();
 
     # If the client can use cache, by all means do so
     if ((my $rc = $r->meets_conditions) != Apache2::Const::OK) {
