@@ -17,6 +17,7 @@ Sample <Location> directive:
   <Location /images>
   	SetHandler perl-script
   	PerlHandler Apache2::PerlResize
+	PerlSetVar CacheDir /var/tmp      # Defaults to /var/cache/apache2/mod_perl_resize
   </Location>
 
 The mod_perl should be configured to load libraries. Sample startup.pl is
@@ -42,5 +43,3 @@ TODO:
 
 * Test different kinds of $err combinations to verify that it works
 * Add etag in addition to Last-Modified
-* Figure out why sendfile($file) didn't set 'Last-Modified' even thoug mtime
-  was set.
